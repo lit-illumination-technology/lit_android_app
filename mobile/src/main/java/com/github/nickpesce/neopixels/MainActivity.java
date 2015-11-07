@@ -2,11 +2,14 @@ package com.github.nickpesce.neopixels;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.net.DatagramPacket;
@@ -15,7 +18,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, TextView.OnEditorActionListener {
 
     private String hostName = "nickspi.student.umd.edu";
     private int port = 42297;
@@ -28,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         bSend = (Button)findViewById(R.id.bSend);
         tfCommand = (EditText)findViewById(R.id.tfCommand);
+        tfCommand.setOnEditorActionListener(this);
         bSend.setOnClickListener(this);
     }
 
@@ -37,6 +41,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             sendCommand(tfCommand.getText().toString());
             tfCommand.setText("");
         }
+    }
+
+    @Override
+    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+        if(v.equals(tfCommand) && actionId == EditorInfo.IME_ACTION_SEND) {
+            sendCommand(tfCommand.getText().toString());
+            tfCommand.setText("");
+            return true;
+        }
+        return false;
     }
 
     private void sendCommand(final String command)
