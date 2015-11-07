@@ -4,13 +4,65 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    private String hostName = "nickspi.student.umd.edu";
+    private int port = 42297;
+    private Button bSend;
+    private EditText tfCommand;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        bSend = (Button)findViewById(R.id.bSend);
+        tfCommand = (EditText)findViewById(R.id.tfCommand);
+        bSend.setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View v) {
+        if(v.equals(bSend)) {
+            sendCommand(tfCommand.getText().toString());
+            tfCommand.setText("");
+        }
+    }
+
+    private void sendCommand(final String command)
+    {
+        new Thread(new Runnable(){
+            public void run() {
+                try {
+                    byte[] buf = command.getBytes();
+                    DatagramSocket socket = new DatagramSocket(port);
+                    InetAddress host = InetAddress.getByName(hostName);
+                    DatagramPacket packet = new DatagramPacket(buf, buf.length, host, port);
+                    socket.send(packet);
+                    socket.close();
+                }catch(Exception e)
+                {
+                    e.printStackTrace();
+                    runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast toast = Toast.makeText(MainActivity.this, "Couldn't connect.", Toast.LENGTH_LONG);
+                            toast.show();
+                        }
+                    });
+
+                }
+            }
+        }).start();
     }
 
     @Override
