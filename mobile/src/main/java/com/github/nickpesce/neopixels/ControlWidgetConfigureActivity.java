@@ -17,7 +17,7 @@ public class ControlWidgetConfigureActivity extends Activity {
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
     EditText mAppWidgetText;
     private static final String PREFS_NAME = "com.github.nickpesce.neopixels.ControlWidget";
-    private static final String PREF_PREFIX_KEY = "appwidget_";
+    private static final String PREF_PREFIX_KEY = "controlwidget_";
 
     public ControlWidgetConfigureActivity() {
         super();
