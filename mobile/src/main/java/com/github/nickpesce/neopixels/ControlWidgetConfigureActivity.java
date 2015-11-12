@@ -87,7 +87,7 @@ public class ControlWidgetConfigureActivity extends Activity {
         if (titleValue != null) {
             return titleValue;
         } else {
-            return context.getString(R.string.appwidget_text);
+            return "Error";
         }
     }
 
