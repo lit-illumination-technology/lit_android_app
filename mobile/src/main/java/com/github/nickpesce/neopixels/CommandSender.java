@@ -55,7 +55,8 @@ public class CommandSender{
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, host, port);
                 socket.send(packet);
                 socket.close();
-                return "Command " + command + " sent!";
+                return null;
+                //return "Command " + command + " sent!";
             }catch(IOException e)
             {
                 return "Could not connect!";
@@ -65,7 +66,8 @@ public class CommandSender{
         @Override
         protected void onPostExecute(String toastText) {
             super.onPostExecute(toastText);
-            Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show();
+            if(toastText != null)
+                Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show();
 
         }
     }
