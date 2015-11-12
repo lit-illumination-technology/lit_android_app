@@ -10,20 +10,12 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, TextView.OnEditorActionListener {
 
-    private String hostName = "nickspi.student.umd.edu";
-    private int port = 42297;
     private Button bSend;
     private EditText tfCommand;
+    private CommandSender sender;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,50 +25,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tfCommand = (EditText)findViewById(R.id.tfCommand);
         tfCommand.setOnEditorActionListener(this);
         bSend.setOnClickListener(this);
+        sender = new CommandSender(this, "nickspi.student.umd.edu", 42297);
     }
 
     @Override
     public void onClick(View v) {
         if(v.equals(bSend)) {
-            sendCommand(tfCommand.getText().toString());
+            sender.sendCommand(tfCommand.getText().toString());
             tfCommand.setText("");
         }
     }
 
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-        if(v.equals(tfCommand) && actionId == EditorInfo.IME_ACTION_SEND) {
-            sendCommand(tfCommand.getText().toString());
+        if (v.equals(tfCommand) && actionId == EditorInfo.IME_ACTION_SEND) {
+            sender.sendCommand(tfCommand.getText().toString());
             tfCommand.setText("");
             return true;
         }
         return false;
-    }
-
-    private void sendCommand(final String command)
-    {
-        new Thread(new Runnable(){
-            public void run() {
-                try {
-                    byte[] buf = command.getBytes();
-                    DatagramSocket socket = new DatagramSocket(port);
-                    InetAddress host = InetAddress.getByName(hostName);
-                    DatagramPacket packet = new DatagramPacket(buf, buf.length, host, port);
-                    socket.send(packet);
-                    socket.close();
-                }catch(Exception e)
-                {
-                    e.printStackTrace();
-                    runOnUiThread(new Runnable() {
-                        public void run() {
-                            Toast toast = Toast.makeText(MainActivity.this, "Couldn't connect.", Toast.LENGTH_LONG);
-                            toast.show();
-                        }
-                    });
-
-                }
-            }
-        }).start();
     }
 
     @Override
