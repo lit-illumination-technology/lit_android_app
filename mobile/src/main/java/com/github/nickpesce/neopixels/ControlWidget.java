@@ -1,8 +1,10 @@
 package com.github.nickpesce.neopixels;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
+import android.content.Intent;
 import android.widget.RemoteViews;
 
 /**
@@ -10,6 +12,18 @@ import android.widget.RemoteViews;
  * App Widget Configuration implemented in {@link ControlWidgetConfigureActivity ControlWidgetConfigureActivity}
  */
 public class ControlWidget extends AppWidgetProvider {
+
+    private static final String ACTION = "DO ACTION";
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        super.onReceive(context, intent);
+        if(intent.getAction().equals(ACTION))
+        {
+            int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+            String command = ControlWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
+            //TODO send command
+        }
+    }
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
@@ -43,9 +57,20 @@ public class ControlWidget extends AppWidgetProvider {
                                 int appWidgetId) {
 
         CharSequence widgetText = ControlWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
+
+        //Create an intent to send a command
+        Intent intent = new Intent(context, ControlWidget.class);
+        intent.setAction(ACTION);
+
+        //Get the intent ready.
+        PendingIntent pending = PendingIntent.getActivity(context, 0, intent, 0);
+
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.control_widget);
-        views.setTextViewText(R.id.appwidget_text, widgetText);
+        views.setTextViewText(R.id.controlwidget_text, widgetText);
+
+        //Add a listener on the widget view to send the intent when pressed.
+        views.setOnClickPendingIntent(R.id.controlwidget_text, pending);
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
