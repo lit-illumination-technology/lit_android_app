@@ -4,9 +4,8 @@
 
     <TextView android:id="@+id/controlwidget_text" android:layout_width="wrap_content"
         android:layout_height="wrap_content" android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true" android:text="@string/appwidget_text"
-        android:textColor="#ffffff" android:textSize="24sp" android:textStyle="bold|italic"
-        android:layout_margin="8dp" android:contentDescription="@string/appwidget_text"
-        android:background="#09C" />
+        android:layout_centerVertical="true" android:textColor="#ffffff"
+        android:textSize="24sp" android:textStyle="bold|italic"
+        android:layout_margin="8dp" android:background="#09C"/>
 
 </RelativeLayout>
