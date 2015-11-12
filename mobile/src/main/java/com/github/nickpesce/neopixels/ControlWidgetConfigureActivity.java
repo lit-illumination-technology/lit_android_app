@@ -15,9 +15,11 @@ import android.widget.EditText;
 public class ControlWidgetConfigureActivity extends Activity {
 
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-    EditText mAppWidgetText;
+    EditText mAppWidgetCommand, mAppWidgetName;
     private static final String PREFS_NAME = "com.github.nickpesce.neopixels.ControlWidget";
     private static final String PREF_PREFIX_KEY = "controlwidget_";
+    private static final String PREF_SUFFIX_NAME = "_name";
+    private static final String PREF_SUFFIX_COMMAND = "_command";
 
     public ControlWidgetConfigureActivity() {
         super();
@@ -32,7 +34,9 @@ public class ControlWidgetConfigureActivity extends Activity {
         setResult(RESULT_CANCELED);
 
         setContentView(R.layout.control_widget_configure);
-        mAppWidgetText = (EditText) findViewById(R.id.appwidget_text);
+        mAppWidgetCommand = (EditText) findViewById(R.id.appwidget_text);
+        mAppWidgetName = (EditText) findViewById(R.id.appwidget_name);
+
         findViewById(R.id.add_button).setOnClickListener(mOnClickListener);
 
         // Find the widget id from the intent.
@@ -55,8 +59,10 @@ public class ControlWidgetConfigureActivity extends Activity {
             final Context context = ControlWidgetConfigureActivity.this;
 
             // When the button is clicked, store the string locally
-            String widgetText = mAppWidgetText.getText().toString();
-            saveTitlePref(context, mAppWidgetId, widgetText);
+            String widgetCommand = mAppWidgetCommand.getText().toString();
+            saveCommandPref(context, mAppWidgetId, widgetCommand);
+            String widgetName = mAppWidgetName.getText().toString();
+            saveTitlePref(context, mAppWidgetId, widgetName);
 
             // It is the responsibility of the configuration activity to update the app widget
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -73,7 +79,14 @@ public class ControlWidgetConfigureActivity extends Activity {
     // Write the prefix to the SharedPreferences object for this widget
     static void saveTitlePref(Context context, int appWidgetId, String text) {
         SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
-        prefs.putString(PREF_PREFIX_KEY + appWidgetId, text);
+        prefs.putString(PREF_PREFIX_KEY + appWidgetId + PREF_SUFFIX_NAME, text);
+        prefs.commit();
+    }
+
+    // Write the prefix to the SharedPreferences object for this widget
+    static void saveCommandPref(Context context, int appWidgetId, String text) {
+        SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
+        prefs.putString(PREF_PREFIX_KEY + appWidgetId + PREF_SUFFIX_COMMAND, text);
         prefs.commit();
     }
 
@@ -81,9 +94,19 @@ public class ControlWidgetConfigureActivity extends Activity {
     // If there is no preference saved, get the default from a resource
     static String loadTitlePref(Context context, int appWidgetId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
-        String titleValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId, null);
+        String titleValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId + PREF_SUFFIX_NAME, null);
         if (titleValue != null) {
             return titleValue;
+        } else {
+            return "Error";
+        }
+    }
+
+    static String loadCommandPref(Context context, int appWidgetId) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
+        String commandValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId + PREF_SUFFIX_COMMAND, null);
+        if (commandValue != null) {
+            return commandValue;
         } else {
             return "Error";
         }

@@ -20,7 +20,7 @@ public class ControlWidget extends AppWidgetProvider {
         if(intent.getAction().equals(ACTION))
         {
             int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
-            String command = ControlWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
+            String command = ControlWidgetConfigureActivity.loadCommandPref(context, appWidgetId);
             CommandSender sender = new CommandSender(context, "nickspi.student.umd.edu", 42297);
             sender.sendCommand(command);
         }
@@ -69,7 +69,7 @@ public class ControlWidget extends AppWidgetProvider {
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.control_widget);
-        views.setTextViewText(R.id.controlwidget_text, widgetText.toString().split(" ")[0]);
+        views.setTextViewText(R.id.controlwidget_text, widgetText);
 
         //Add a listener on the widget view to send the intent when pressed.
         views.setOnClickPendingIntent(R.id.controlwidget_text, pending);
