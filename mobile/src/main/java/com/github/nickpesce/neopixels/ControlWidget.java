@@ -21,7 +21,8 @@ public class ControlWidget extends AppWidgetProvider {
         {
             int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
             String command = ControlWidgetConfigureActivity.loadTitlePref(context, appWidgetId);
-            //TODO send command
+            CommandSender sender = new CommandSender(context, "nickspi.student.umd.edu", 42297);
+            sender.sendCommand(command);
         }
     }
 
@@ -60,14 +61,15 @@ public class ControlWidget extends AppWidgetProvider {
 
         //Create an intent to send a command
         Intent intent = new Intent(context, ControlWidget.class);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
         intent.setAction(ACTION);
 
         //Get the intent ready.
-        PendingIntent pending = PendingIntent.getActivity(context, 0, intent, 0);
+        PendingIntent pending = PendingIntent.getBroadcast(context, appWidgetId, intent, 0);
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.control_widget);
-        views.setTextViewText(R.id.controlwidget_text, widgetText);
+        views.setTextViewText(R.id.controlwidget_text, widgetText.toString().split(" ")[0]);
 
         //Add a listener on the widget view to send the intent when pressed.
         views.setOnClickPendingIntent(R.id.controlwidget_text, pending);
