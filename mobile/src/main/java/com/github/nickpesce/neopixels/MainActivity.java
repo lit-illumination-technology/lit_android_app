@@ -1,37 +1,121 @@
 package com.github.nickpesce.neopixels;
 
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.method.KeyListener;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, TextView.OnEditorActionListener {
+import java.util.ArrayList;
+import java.util.Arrays;
 
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, TextView.OnEditorActionListener, AdapterView.OnItemSelectedListener, KeyListener, SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener {
+
+    private String command;
     private Button bSend;
     private EditText tfCommand;
+    private Spinner spCommand;
+    private SeekBar sbRed, sbGreen, sbBlue, sbSpeed;
+    private Switch swColor, swSpeed;
+    private SurfaceView svColor;
     private CommandSender sender;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        sender = new CommandSender(this, this, "nickspi.student.umd.edu", 42297);
+
         bSend = (Button)findViewById(R.id.bSend);
+
         tfCommand = (EditText)findViewById(R.id.tfCommand);
+        tfCommand.setKeyListener(this);
         tfCommand.setOnEditorActionListener(this);
+
+        spCommand = (Spinner)findViewById(R.id.spCommand);
+        spCommand.setOnItemSelectedListener(this);
+        sender.sendCommand("commands");
+
+        sbRed = (SeekBar) findViewById(R.id.sbRed);
+        sbRed.setOnSeekBarChangeListener(this);
+
+        sbGreen = (SeekBar) findViewById(R.id.sbGreen);
+        sbGreen.setOnSeekBarChangeListener(this);
+
+        sbBlue = (SeekBar) findViewById(R.id.sbBlue);
+        sbBlue.setOnSeekBarChangeListener(this);
+
+        sbSpeed = (SeekBar) findViewById(R.id.sbSpeed);
+        sbSpeed.setOnSeekBarChangeListener(this);
+
+        swColor = (Switch)findViewById(R.id.swColor);
+        swColor.setOnCheckedChangeListener(this);
+
+        swSpeed = (Switch) findViewById(R.id.swSpeed);
+        swSpeed.setOnCheckedChangeListener(this);
+
+        svColor = (SurfaceView) findViewById(R.id.svColor);
+
         bSend.setOnClickListener(this);
-        sender = new CommandSender(this, "nickspi.student.umd.edu", 42297);
+    }
+
+    public void setCommands(String raw)
+    {
+        String[] split = raw.split("~ ");
+        if(split.length < 3)return;
+        String[] commands = Arrays.copyOfRange(split, 2, split.length);
+        for(int i = 0; i < commands.length; i++)
+            commands[i] = commands[i].trim();
+        //First element is syntax. Second is 'Each' which will have its own gui.
+        ArrayAdapter<CharSequence> adapter = new ArrayAdapter(this,android.R.layout.simple_spinner_item, commands);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spCommand.setAdapter(adapter);
+        spCommand.setVisibility(Spinner.VISIBLE);
+        spCommand.setSelection(Arrays.asList(commands).indexOf("on"));
+        swColor.setVisibility(Switch.VISIBLE);
+        swSpeed.setVisibility(Switch.VISIBLE);
+    }
+
+    private void updateCommand()
+    {
+        if(spCommand.getSelectedItem() == null)
+        {
+            command = "";
+            return;
+        }
+        command = spCommand.getSelectedItem().toString();
+        if(swColor.isChecked())
+            command += " -c (" + sbRed.getProgress() + "," + sbGreen.getProgress() + "," + sbBlue.getProgress() +")";
+        if(swSpeed.isChecked())
+            command += " -s " + sbSpeed.getProgress();
+        tfCommand.setText(command);
+    }
+
+    private void updateColor()
+    {
+        svColor.setBackgroundColor(Color.argb(255, sbRed.getProgress(), sbGreen.getProgress(), sbBlue.getProgress()));
     }
 
     @Override
     public void onClick(View v) {
         if(v.equals(bSend)) {
-            sender.sendCommand(tfCommand.getText().toString());
+            sender.sendCommand(command);
             tfCommand.setText("");
         }
     }
@@ -39,8 +123,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (v.equals(tfCommand) && actionId == EditorInfo.IME_ACTION_SEND) {
-            sender.sendCommand(tfCommand.getText().toString());
-            tfCommand.setText("");
+            sender.sendCommand(command);
             return true;
         }
         return false;
@@ -66,5 +149,73 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+    {
+        updateCommand();
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent)
+    {
+        updateCommand();
+    }
+
+    @Override
+    public int getInputType() {
+        return 0;
+    }
+
+    @Override
+    public boolean onKeyDown(View view, Editable text, int keyCode, KeyEvent event) {
+        return false;
+    }
+
+    @Override
+    public boolean onKeyUp(View view, Editable text, int keyCode, KeyEvent event) {
+        command = tfCommand.getText().toString();
+        return false;
+    }
+
+    @Override
+    public boolean onKeyOther(View view, Editable text, KeyEvent event) {
+        return false;
+    }
+
+    @Override
+    public void clearMetaKeyState(View view, Editable content, int states) {
+
+    }
+
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        updateCommand();
+        updateColor();
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (buttonView.equals(swColor))
+        {
+            int visible = isChecked ? SeekBar.VISIBLE : SeekBar.GONE;
+            sbRed.setVisibility(visible);
+            sbGreen.setVisibility(visible);
+            sbBlue.setVisibility(visible);
+            svColor.setVisibility(visible);
+        }else
+            sbSpeed.setVisibility(isChecked ? SeekBar.VISIBLE : SeekBar.GONE);
+        updateCommand();
     }
 }

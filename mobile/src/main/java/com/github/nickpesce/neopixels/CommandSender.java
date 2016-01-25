@@ -18,11 +18,18 @@ public class CommandSender{
     private String hostName;
     private int port;
     private Context context;
+    private MainActivity mainActivity;
     public CommandSender(final Context context, final String hostName, int port)
     {
         this.context = context;
         this.hostName = hostName;
         this.port = port;
+    }
+
+    public CommandSender(final Context context, MainActivity activity, final String hostName, int port)
+    {
+        this(context, hostName, port);
+        this.mainActivity = activity;
     }
 
     /**
@@ -37,10 +44,11 @@ public class CommandSender{
 
     class Task extends AsyncTask<String, Void, String>
     {
+        String command = "";
         @Override
         protected String doInBackground(String... s)
         {
-            String command = s[0];
+            command = s[0];
             InetAddress host;
             try {
                 host = InetAddress.getByName(CommandSender.this.hostName);
@@ -54,9 +62,11 @@ public class CommandSender{
                 DatagramSocket socket = new DatagramSocket(port);
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, host, port);
                 socket.send(packet);
+                buf = new byte[256];
+                DatagramPacket rec = new DatagramPacket(buf, buf.length);
+                socket.receive(rec);
                 socket.close();
-                return null;
-                //return "Command " + command + " sent!";
+                return new String(rec.getData());
             }catch(IOException e)
             {
                 return "Could not connect!";
@@ -64,11 +74,13 @@ public class CommandSender{
         }
 
         @Override
-        protected void onPostExecute(String toastText) {
-            super.onPostExecute(toastText);
-            if(toastText != null)
-                Toast.makeText(context, toastText, Toast.LENGTH_SHORT).show();
-
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            if(result == null)return;
+            if(command.equals("commands") && mainActivity != null)
+                mainActivity.setCommands(result);
+            else
+                Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
         }
     }
 }
