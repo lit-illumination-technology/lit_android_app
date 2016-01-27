@@ -128,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(swSpeed.isChecked())
             command += " -s " + sbSpeed.getProgress();
         tfCommand.setText(command);
+        sender.sendCommand(command);
     }
 
     private void updateColor()
@@ -183,7 +184,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         swSpeed.setVisibility((params & HAS_SPEED) != 0 ? Switch.VISIBLE : Switch.GONE);
         swColor.setChecked(false);
         swColor.setChecked(false);
-
     }
 
     @Override
