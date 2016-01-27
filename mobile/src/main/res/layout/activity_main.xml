@@ -69,7 +69,6 @@
         android:layout_below="@+id/sbGreen"
         android:layout_alignLeft="@+id/sbGreen"
         android:layout_alignStart="@+id/sbGreen"
-        android:layout_marginTop="20dp"
         android:thumbTint="#FF0000FF"
         android:progressTint="#FF0000FF"
         android:visibility="gone"
