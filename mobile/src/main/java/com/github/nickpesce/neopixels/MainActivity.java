@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.method.KeyListener;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -182,6 +181,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         byte params = commands.get(spCommand.getSelectedItem().toString());
         swColor.setVisibility((params & HAS_COLOR) != 0 ? Switch.VISIBLE : Switch.GONE);
         swSpeed.setVisibility((params & HAS_SPEED) != 0 ? Switch.VISIBLE : Switch.GONE);
+        swColor.setChecked(false);
+        swColor.setChecked(false);
+
     }
 
     @Override
