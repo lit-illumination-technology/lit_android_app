@@ -1,5 +1,6 @@
 package com.github.nickpesce.neopixels;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -183,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         swColor.setVisibility((params & HAS_COLOR) != 0 ? Switch.VISIBLE : Switch.GONE);
         swSpeed.setVisibility((params & HAS_SPEED) != 0 ? Switch.VISIBLE : Switch.GONE);
         swColor.setChecked(false);
-        swColor.setChecked(false);
+        swSpeed.setChecked(false);
     }
 
     @Override
