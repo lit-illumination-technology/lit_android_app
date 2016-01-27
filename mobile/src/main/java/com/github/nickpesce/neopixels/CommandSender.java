@@ -62,7 +62,7 @@ public class CommandSender{
                 DatagramSocket socket = new DatagramSocket(port);
                 DatagramPacket packet = new DatagramPacket(buf, buf.length, host, port);
                 socket.send(packet);
-                buf = new byte[256];
+                buf = new byte[1024];
                 DatagramPacket rec = new DatagramPacket(buf, buf.length);
                 socket.receive(rec);
                 socket.close();
