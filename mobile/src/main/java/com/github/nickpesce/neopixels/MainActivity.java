@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextWatcher;
 import android.text.method.KeyListener;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -25,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, TextView.OnEditorActionListener, AdapterView.OnItemSelectedListener, KeyListener, SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, TextView.OnEditorActionListener, AdapterView.OnItemSelectedListener, SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener {
 
     private String command;
     private Button bSend;
@@ -48,7 +49,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bSend = (Button)findViewById(R.id.bSend);
 
         tfCommand = (EditText)findViewById(R.id.tfCommand);
-        tfCommand.setKeyListener(this);
+        tfCommand.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                command = tfCommand.getText().toString();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
         tfCommand.setOnEditorActionListener(this);
 
         spCommand = (Spinner)findViewById(R.id.spCommand);
@@ -174,32 +188,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onNothingSelected(AdapterView<?> parent)
     {
         updateCommand();
-    }
-
-    @Override
-    public int getInputType() {
-        return 0;
-    }
-
-    @Override
-    public boolean onKeyDown(View view, Editable text, int keyCode, KeyEvent event) {
-        return false;
-    }
-
-    @Override
-    public boolean onKeyUp(View view, Editable text, int keyCode, KeyEvent event) {
-        command = tfCommand.getText().toString();
-        return false;
-    }
-
-    @Override
-    public boolean onKeyOther(View view, Editable text, KeyEvent event) {
-        return false;
-    }
-
-    @Override
-    public void clearMetaKeyState(View view, Editable content, int states) {
-
     }
 
     @Override
