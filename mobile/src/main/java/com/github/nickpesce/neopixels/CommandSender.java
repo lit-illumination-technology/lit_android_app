@@ -1,34 +1,35 @@
 package com.github.nickpesce.neopixels;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 
-/**
- * Created by Nick on 11/11/2015.
- */
 public class CommandSender{
 
-    private String hostName;
-    private int port;
     private Context context;
     private MainActivity mainActivity;
-    public CommandSender(final Context context, final String hostName, int port)
+    private SharedPreferences prefs;
+    public CommandSender(final Context context)
     {
         this.context = context;
-        this.hostName = hostName;
-        this.port = port;
+        prefs = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public CommandSender(final Context context, MainActivity activity, final String hostName, int port)
+    public CommandSender(final Context context, MainActivity activity)
     {
-        this(context, hostName, port);
+        this(context);
         this.mainActivity = activity;
     }
 
@@ -42,6 +43,9 @@ public class CommandSender{
         new Task().execute(command);
     }
 
+    /**
+     * Send the command asynchronously.
+     */
     class Task extends AsyncTask<String, Void, String>
     {
         String command = "";
@@ -51,28 +55,46 @@ public class CommandSender{
             command = s[0];
             InetAddress host;
             try {
-                host = InetAddress.getByName(CommandSender.this.hostName);
+                //get the host name from preferences.
+                host = InetAddress.getByName(prefs.getString("hostname", "nickspi.student.umd.edu"));
             }catch(UnknownHostException e)
             {
                 return "Could not find host!";
             }
 
             try {
-                byte[] buf = command.getBytes();
-                DatagramSocket socket = new DatagramSocket(port);
-                DatagramPacket packet = new DatagramPacket(buf, buf.length, host, port);
-                socket.send(packet);
-                buf = new byte[1024];
-                DatagramPacket rec = new DatagramPacket(buf, buf.length);
-                socket.receive(rec);
+                //get the port from preferences
+                int port = Integer.parseInt(prefs.getString("port", "42297"));
+                Socket socket = new Socket(host, port);
+                //Set the socket to time out after 2s.
+                socket.setSoTimeout(2000);
+                //Create a stream to output data to.
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                //Print the data to the output stream
+                out.println(command);
+                //Create a stream to receive data from
+                BufferedReader in = new BufferedReader(
+                        new InputStreamReader(socket.getInputStream()));
+                String line;
+                String ret = "";
+                //Get all of the data sent back and put it in one string.
+                while((line = in.readLine())!= null) {
+                    ret += line;
+                }
                 socket.close();
-                return new String(rec.getData());
+                return ret;
             }catch(IOException e)
             {
+                e.printStackTrace();
+
                 return "Could not connect!";
             }
         }
 
+        /**
+         * Deal with the returned data.
+         * @param result The data that was returned from the connection
+         */
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
