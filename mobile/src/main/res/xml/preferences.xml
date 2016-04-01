@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <EditTextPreference
+        android:key="hostname"
+        android:inputType="none"
+        android:title="Hostname"
+        android:defaultValue="my.hostname.com"
+        android:summary="The location of the Raspberry Pi"
+        android:hint="hostname"
+        />
+
+    <EditTextPreference
+        android:key="port"
+        android:inputType="number"
+        android:title="Port"
+        android:defaultValue="12345"
+        android:summary="The port of the Raspberry Pi"
+        android:hint="port"
+        />
+
+    <EditTextPreference
+        android:key="password"
+        android:inputType="none"
+        android:title="Password"
+        android:defaultValue="mypass123"
+        android:summary="The password in the config.ini"
+        android:hint="password"
+        />
+
+</PreferenceScreen>
