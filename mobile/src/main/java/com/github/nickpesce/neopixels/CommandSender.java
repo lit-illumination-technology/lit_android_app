@@ -53,6 +53,8 @@ public class CommandSender{
         protected String doInBackground(String... s)
         {
             command = s[0];
+            if(command == null)
+                return null;
             InetAddress host;
             try {
                 //get the host name from preferences.
@@ -72,14 +74,15 @@ public class CommandSender{
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 //Print the data to the output stream
                 out.println(command);
+
                 //Create a stream to receive data from
                 BufferedReader in = new BufferedReader(
                         new InputStreamReader(socket.getInputStream()));
                 String line;
-                String ret = "";
                 //Get all of the data sent back and put it in one string.
+                String ret = in.readLine();
                 while((line = in.readLine())!= null) {
-                    ret += line;
+                    ret += "\n" + line;
                 }
                 socket.close();
                 return ret;
@@ -98,7 +101,7 @@ public class CommandSender{
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            if(result == null)return;
+            if(result == null || command == null)return;
             if(command.equals("commands") && mainActivity != null)
                 mainActivity.setCommands(result);
             else
