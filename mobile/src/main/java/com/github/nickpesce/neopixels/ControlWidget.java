@@ -21,7 +21,7 @@ public class ControlWidget extends AppWidgetProvider {
         {
             int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
             String command = ControlWidgetConfigureActivity.loadCommandPref(context, appWidgetId);
-            CommandSender sender = new CommandSender(context, "nickspi.student.umd.edu", 42297);
+            CommandSender sender = new CommandSender(context);
             sender.sendCommand(command);
         }
     }

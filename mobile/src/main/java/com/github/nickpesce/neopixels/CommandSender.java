@@ -21,6 +21,7 @@ public class CommandSender{
     private Context context;
     private MainActivity mainActivity;
     private SharedPreferences prefs;
+
     public CommandSender(final Context context)
     {
         this.context = context;
@@ -73,7 +74,7 @@ public class CommandSender{
                 //Create a stream to output data to.
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                 //Print the data to the output stream
-                out.println(command);
+                out.println(prefs.getString("password", "pass123") + " " + command);
 
                 //Create a stream to receive data from
                 BufferedReader in = new BufferedReader(

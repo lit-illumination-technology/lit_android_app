@@ -1,7 +1,9 @@
 package com.github.nickpesce.neopixels;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -44,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sender = new CommandSender(this, this, "nickspi.student.umd.edu", 42297);
+        sender = new CommandSender(this, this);
 
         bSend = (Button)findViewById(R.id.bSend);
 
@@ -90,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         svColor = (SurfaceView) findViewById(R.id.svColor);
 
         bSend.setOnClickListener(this);
+        
     }
 
     public void setCommands(String raw)
@@ -97,14 +100,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String[] helpStrings = raw.split("~ ");
         for(int i = 0; i < helpStrings.length; i++)
             helpStrings[i] = helpStrings[i].trim();
-        commands = new HashMap<String, Byte>();
-        System.out.println("# of commands: " + helpStrings.length);
+        commands = new HashMap<>();
         for(int i = 1; i < helpStrings.length; i++) {
             byte options = (byte)((helpStrings[i].contains("-c") ? HAS_COLOR:0)
                     | (helpStrings[i].contains("-s") ? HAS_SPEED:0));
             if(helpStrings[i].contains("each"))
-                options = IS_EACH;
-            System.out.println(helpStrings[i] + " " + options);
+                continue;
+                //options = IS_EACH;
             commands.put(helpStrings[i].split(" ")[0], options);
         }
         ArrayAdapter<CharSequence> adapter = new ArrayAdapter(this,android.R.layout.simple_spinner_item, new ArrayList(commands.keySet()));
@@ -129,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(swSpeed.isChecked())
             command += " -s " + sbSpeed.getProgress();
         tfCommand.setText(command);
-        sender.sendCommand(command);
+        //sender.sendCommand(command);
     }
 
     private void updateColor()
@@ -141,7 +143,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         if(v.equals(bSend)) {
             sender.sendCommand(command);
-            tfCommand.setText("");
         }
     }
 
@@ -170,6 +171,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+
             return true;
         }
 
