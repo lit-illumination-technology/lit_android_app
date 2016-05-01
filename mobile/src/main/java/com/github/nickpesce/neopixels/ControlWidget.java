@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.widget.RemoteViews;
 
+import java.util.HashMap;
+
 /**
  * Implementation of App Widget functionality.
  * App Widget Configuration implemented in {@link ControlWidgetConfigureActivity ControlWidgetConfigureActivity}
@@ -22,7 +24,7 @@ public class ControlWidget extends AppWidgetProvider {
             int appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
             String command = ControlWidgetConfigureActivity.loadCommandPref(context, appWidgetId);
             CommandSender sender = new CommandSender(context);
-            sender.sendCommand(command);
+            sender.startEffect(command);
         }
     }
 

@@ -12,4 +12,5 @@
     <string name="pref_header_general">General</string>
 
     <string name="pref_title_hostname">Hostname</string>
+
 </resources>

@@ -5,113 +5,19 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
 
+    <fragment android:name="com.github.nickpesce.neopixels.CommandEditor"
+        android:id="@+id/fCommandEditor"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:layout="@layout/fragment_command_editor" />
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Send"
         android:id="@+id/bSend"
-        android:layout_below="@+id/tfCommand"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp" />
-
-    <EditText
-        android:inputType="textNoSuggestions"
-        android:imeOptions="actionSend"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/tfCommand"
-        android:layout_marginBottom="20dp"
-        android:layout_below="@+id/sbSpeed"
-        android:layout_alignParentLeft="true" />
-
-    <Spinner
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/spCommand"
-        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
+        android:layout_below="@+id/fCommandEditor"
         android:visibility="gone"/>
-
-    <SeekBar
-        android:layout_width="256dp"
-        android:layout_marginBottom="20dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/sbRed"
-        android:layout_below="@+id/swColor"
-        android:layout_alignLeft="@+id/sbGreen"
-        android:layout_alignStart="@+id/sbGreen"
-        android:indeterminate="false"
-        android:indeterminateOnly="false"
-        android:focusableInTouchMode="false"
-        android:progressTint="#FFFF0000"
-        android:thumbTint="#FFFF0000"
-        android:visibility="gone"
-        android:max="255" />
-
-    <SeekBar
-        android:layout_width="256dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/sbGreen"
-        android:layout_below="@+id/sbRed"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
-        android:thumbTint="#FF00FF00"
-        android:progressTint="#FF00FF00"
-        android:visibility="gone"
-        android:max="255" />
-
-    <SeekBar
-        android:layout_width="256dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/sbBlue"
-        android:layout_marginBottom="20dp"
-        android:layout_below="@+id/sbGreen"
-        android:layout_alignLeft="@+id/sbGreen"
-        android:layout_alignStart="@+id/sbGreen"
-        android:thumbTint="#FF0000FF"
-        android:progressTint="#FF0000FF"
-        android:visibility="gone"
-        android:max="255" />
-
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Color"
-        android:id="@+id/swColor"
-        android:layout_below="@+id/spCommand"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="15dp"
-        android:visibility="gone"/>
-
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Speed"
-        android:id="@+id/swSpeed"
-        android:layout_below="@+id/svColor"
-        android:layout_centerHorizontal="true"
-        android:visibility="gone"/>
-
-    <SeekBar
-        android:layout_width="256dp"
-        android:layout_height="wrap_content"
-        android:id="@+id/sbSpeed"
-        android:layout_below="@+id/swSpeed"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="26dp"
-        android:progress="1"
-        android:max="10"
-        android:visibility="gone"/>
-
-    <SurfaceView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:id="@+id/svColor"
-        android:layout_below="@+id/sbBlue"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
-        android:visibility="gone"/>
-
 </RelativeLayout>

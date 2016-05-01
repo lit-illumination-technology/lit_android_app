@@ -19,6 +19,16 @@
         android:hint="port"
         />
 
+
+    <EditTextPreference
+        android:key="username"
+        android:inputType="none"
+        android:title="Username"
+        android:defaultValue="admin"
+        android:summary="The username in the config.ini"
+        android:hint="username"
+        />
+
     <EditTextPreference
         android:key="password"
         android:inputType="none"

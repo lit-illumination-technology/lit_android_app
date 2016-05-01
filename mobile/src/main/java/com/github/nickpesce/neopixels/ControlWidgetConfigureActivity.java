@@ -1,25 +1,38 @@
 package com.github.nickpesce.neopixels;
 
-import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The configuration screen for the {@link ControlWidget ControlWidget} AppWidget.
  */
-public class ControlWidgetConfigureActivity extends Activity {
+public class ControlWidgetConfigureActivity extends AppCompatActivity implements CommandEditor.CommandEditorListener{
 
     int mAppWidgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-    EditText mAppWidgetCommand, mAppWidgetName;
+    private EditText mAppWidgetName;
+    private Button bAddWidget;
+    private CommandEditor commandEditor;
+
     private static final String PREFS_NAME = "com.github.nickpesce.neopixels.ControlWidget";
     private static final String PREF_PREFIX_KEY = "controlwidget_";
     private static final String PREF_SUFFIX_NAME = "_name";
     private static final String PREF_SUFFIX_COMMAND = "_command";
+
 
     public ControlWidgetConfigureActivity() {
         super();
@@ -34,10 +47,11 @@ public class ControlWidgetConfigureActivity extends Activity {
         setResult(RESULT_CANCELED);
 
         setContentView(R.layout.control_widget_configure);
-        mAppWidgetCommand = (EditText) findViewById(R.id.appwidget_text);
         mAppWidgetName = (EditText) findViewById(R.id.appwidget_name);
+        bAddWidget = (Button) findViewById(R.id.bAddWidget);
+        commandEditor = (CommandEditor) getSupportFragmentManager().findFragmentById(R.id.fCommandEditor);
 
-        findViewById(R.id.add_button).setOnClickListener(mOnClickListener);
+        bAddWidget.setOnClickListener(mOnClickListener);
 
         // Find the widget id from the intent.
         Intent intent = getIntent();
@@ -58,11 +72,26 @@ public class ControlWidgetConfigureActivity extends Activity {
         public void onClick(View v) {
             final Context context = ControlWidgetConfigureActivity.this;
 
-            // When the button is clicked, store the string locally
-            String widgetCommand = mAppWidgetCommand.getText().toString();
-            saveCommandPref(context, mAppWidgetId, widgetCommand);
+            // When the button is clicked, store the settings locally
+            JSONObject command = new JSONObject();
+            try {
+                command.put("effect", commandEditor.getEffect());
+                if(commandEditor.getArgs() != null && !commandEditor.getArgs().isEmpty())
+                    command.put("args", new JSONObject(commandEditor.getArgs()));
+                saveCommandPref(context, mAppWidgetId, command.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
             String widgetName = mAppWidgetName.getText().toString();
             saveTitlePref(context, mAppWidgetId, widgetName);
+
+
+            HashMap<String, Object> hmArgs = commandEditor.getArgs();
+            HashSet<String> args = new HashSet<>();
+            for(Map.Entry<String, Object> e : hmArgs.entrySet()) {
+                args.add(e.getKey() + ":" + e.getValue().toString());
+            }
 
             // It is the responsibility of the configuration activity to update the app widget
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
@@ -104,18 +133,19 @@ public class ControlWidgetConfigureActivity extends Activity {
 
     static String loadCommandPref(Context context, int appWidgetId) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, 0);
-        String commandValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId + PREF_SUFFIX_COMMAND, null);
-        if (commandValue != null) {
-            return commandValue;
-        } else {
-            return "Error";
-        }
+        String commandValue = prefs.getString(PREF_PREFIX_KEY + appWidgetId + PREF_SUFFIX_COMMAND, "Error");
+        return commandValue;
     }
 
     static void deleteTitlePref(Context context, int appWidgetId) {
         SharedPreferences.Editor prefs = context.getSharedPreferences(PREFS_NAME, 0).edit();
         prefs.remove(PREF_PREFIX_KEY + appWidgetId);
         prefs.commit();
+    }
+
+    @Override
+    public void onEditorReady() {
+
     }
 }
 

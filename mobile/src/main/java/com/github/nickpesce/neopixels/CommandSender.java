@@ -2,111 +2,156 @@ package com.github.nickpesce.neopixels;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.util.Base64;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 
 public class CommandSender{
 
     private Context context;
-    private MainActivity mainActivity;
     private SharedPreferences prefs;
+    RequestQueue queue;
 
     public CommandSender(final Context context)
     {
         this.context = context;
         prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        queue = Volley.newRequestQueue(context);
     }
 
-    public CommandSender(final Context context, MainActivity activity)
-    {
-        this(context);
-        this.mainActivity = activity;
-    }
+    public void sendCommand(JSONObject command) {
+        String port = prefs.getString("port", "42297");
+        String url = prefs.getString("hostname", "nickspi.student.umd.edu") + ":" + port + "/command";
+        //Build the request(With callbacks)
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.POST, url, command,
 
-    /**
-     * Sends a command to the host .
-     * @param command The string command  to send
-     * @throws IOException If the packet could not be sent.
-     */
-    public void sendCommand(final String command)
-    {
-        new Task().execute(command);
-    }
-
-    /**
-     * Send the command asynchronously.
-     */
-    class Task extends AsyncTask<String, Void, String>
-    {
-        String command = "";
-        @Override
-        protected String doInBackground(String... s)
-        {
-            command = s[0];
-            if(command == null)
-                return null;
-            InetAddress host;
-            try {
-                //get the host name from preferences.
-                host = InetAddress.getByName(prefs.getString("hostname", "nickspi.student.umd.edu"));
-            }catch(UnknownHostException e)
-            {
-                return "Could not find host!";
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        String res;
+                        try {
+                            response.getBoolean("status");
+                            res = response.getString("result");
+                        } catch (JSONException e) {
+                            Toast.makeText(context, ""+e, Toast.LENGTH_LONG).show();
+                            e.printStackTrace();
+                            return;
+                        }
+                        Toast.makeText(context, res, Toast.LENGTH_SHORT).show();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(context, new String(error.networkResponse.data), Toast.LENGTH_SHORT).show();
+                    }
+                }) {
+            //add the basic authentication headers
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap();
+                String name = prefs.getString("username", "admin");
+                String pass = prefs.getString("password", "pass123");
+                String credentials = name + ":" + pass;
+                String auth = "Basic "
+                        + Base64.encodeToString(credentials.getBytes(),
+                        Base64.NO_WRAP);
+                headers.put("Authorization", auth);
+                return headers;
             }
+        };
+        //Add the request to the queue
+        queue.add(request);
+    }
 
-            try {
-                //get the port from preferences
-                int port = Integer.parseInt(prefs.getString("port", "42297"));
-                Socket socket = new Socket(host, port);
-                //Set the socket to time out after 2s.
-                socket.setSoTimeout(2000);
-                //Create a stream to output data to.
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                //Print the data to the output stream
-                out.println(prefs.getString("password", "pass123") + " " + command);
+    public void startEffect(String JSON) {
+        JSONObject command;
+        try {
+            command = new JSONObject(JSON);
+            sendCommand(command);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
 
-                //Create a stream to receive data from
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(socket.getInputStream()));
-                String line;
-                //Get all of the data sent back and put it in one string.
-                String ret = in.readLine();
-                while((line = in.readLine())!= null) {
-                    ret += "\n" + line;
+    public void startEffect(String effect, HashMap<String, Object> args)
+    {
+        JSONObject command = new JSONObject();
+        //Build the request payload
+        try {
+            command.put("effect", effect);
+            if(args != null && !args.isEmpty())
+                command.put("args", new JSONObject(args));
+            sendCommand(command);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getEffects(final CommandEditor requester) {
+        String port = prefs.getString("port", "12345");
+        String url = prefs.getString("hostname", "host.example.net") + ":" + port + "/get_effects.json";
+        prefs.getString("password", "pass123");
+
+
+        //Build the request(With callbacks)
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET, url, null,
+
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        JSONArray effects;
+                        try {
+                            effects = response.getJSONArray("effects");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            return;
+                        }
+                        //LinkedHashMap preserves insertion order
+                        LinkedHashMap<String, Byte> ret = new LinkedHashMap();
+                        for(int i = 0; i < effects.length(); i++) {
+                            try {
+                                JSONObject effect = (JSONObject) effects.get(i);
+                                ret.put(effect.getString("name"), (byte) (effect.getInt("modifiers")));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        requester.callBackEffects(ret);
+                    }
+                },
+
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        requester.callBackError("Could not connect!");
+                        Toast.makeText(context, "Could not connect!", Toast.LENGTH_SHORT).show();
+                    }
                 }
-                socket.close();
-                return ret;
-            }catch(IOException e)
-            {
-                e.printStackTrace();
+        );
 
-                return "Could not connect!";
-            }
-        }
-
-        /**
-         * Deal with the returned data.
-         * @param result The data that was returned from the connection
-         */
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            if(result == null || command == null)return;
-            if(command.equals("commands") && mainActivity != null)
-                mainActivity.setCommands(result);
-            else
-                Toast.makeText(context, result, Toast.LENGTH_SHORT).show();
-        }
+        //Add the request to the queue
+        queue.add(request);
     }
 }
