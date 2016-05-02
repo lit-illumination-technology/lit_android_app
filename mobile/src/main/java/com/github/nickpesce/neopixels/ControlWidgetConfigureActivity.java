@@ -73,15 +73,7 @@ public class ControlWidgetConfigureActivity extends AppCompatActivity implements
             final Context context = ControlWidgetConfigureActivity.this;
 
             // When the button is clicked, store the settings locally
-            JSONObject command = new JSONObject();
-            try {
-                command.put("effect", commandEditor.getEffect());
-                if(commandEditor.getArgs() != null && !commandEditor.getArgs().isEmpty())
-                    command.put("args", new JSONObject(commandEditor.getArgs()));
-                saveCommandPref(context, mAppWidgetId, command.toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            saveCommandPref(context, mAppWidgetId, commandEditor.getJSON());
 
             String widgetName = mAppWidgetName.getText().toString();
             saveTitlePref(context, mAppWidgetId, widgetName);

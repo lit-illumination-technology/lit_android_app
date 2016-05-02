@@ -16,6 +16,9 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -191,6 +194,18 @@ public class CommandEditor extends Fragment implements AdapterView.OnItemSelecte
         tvConnecting.setText(errorMessage);
     }
 
+    public String getJSON() {
+        JSONObject command = new JSONObject();
+        try {
+            command.put("effect", effect);
+            if (args != null && !args.isEmpty())
+                command.put("args", new JSONObject(args));
+            return command.toString();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 
     public interface CommandEditorListener {
         void onEditorReady();
