@@ -1,6 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
-    android:padding="@dimen/widget_margin" android:background="#99111111">
+    android:padding="@dimen/widget_margin" android:background="#99111111"
+    android:id="@+id/controlwidget_box">
 
     <TextView android:id="@+id/controlwidget_text" android:layout_width="wrap_content"
         android:layout_height="wrap_content" android:layout_centerHorizontal="true"

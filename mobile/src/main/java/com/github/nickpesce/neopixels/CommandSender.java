@@ -18,9 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -29,7 +27,7 @@ public class CommandSender{
 
     private Context context;
     private SharedPreferences prefs;
-    RequestQueue queue;
+    private RequestQueue queue;
 
     public CommandSender(final Context context)
     {
@@ -63,7 +61,11 @@ public class CommandSender{
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(context, new String(error.networkResponse.data), Toast.LENGTH_SHORT).show();
+                        if(error.networkResponse!=null)
+                            Toast.makeText(context, new String(error.networkResponse.data), Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(context, "Response Error", Toast.LENGTH_SHORT).show();
+
                     }
                 }) {
             //add the basic authentication headers
@@ -110,7 +112,8 @@ public class CommandSender{
 
     public void getEffects(final CommandEditor requester) {
         String port = prefs.getString("port", "12345");
-        String url = prefs.getString("hostname", "host.example.net") + ":" + port + "/get_effects.json";
+        String url = null;
+        url = prefs.getString("hostname", "host.example.net") + ":" + port + "/get_effects.json";
         prefs.getString("password", "pass123");
 
 
@@ -145,8 +148,9 @@ public class CommandSender{
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        requester.callBackError("Could not connect!");
-                        Toast.makeText(context, "Could not connect!", Toast.LENGTH_SHORT).show();
+                        requester.callBackError("Could not connect: " + error.toString());
+                        Toast.makeText(context, "Could not connect: " + error.toString(), Toast.LENGTH_LONG).show();
+                        error.printStackTrace();
                     }
                 }
         );
@@ -154,4 +158,8 @@ public class CommandSender{
         //Add the request to the queue
         queue.add(request);
     }
+
+
+
+
 }

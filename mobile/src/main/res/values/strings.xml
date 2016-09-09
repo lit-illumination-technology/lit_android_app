@@ -1,16 +1,13 @@
 <resources>
     <string name="app_name">Neopixels</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="configure_widget">Command</string>
+    <string name="action_visualization">It\'s Lit</string>
     <string name="configure_widget_name">Widget Name</string>
     <string name="add_widget">Add widget</string>
     <string name="title_activity_settings">Settings</string>
 
     <!-- Strings related to Settings -->
     <string name="pref_header_general">General</string>
-
-    <string name="pref_title_hostname">Hostname</string>
 
 </resources>

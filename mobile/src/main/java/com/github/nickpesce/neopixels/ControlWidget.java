@@ -74,7 +74,7 @@ public class ControlWidget extends AppWidgetProvider {
         views.setTextViewText(R.id.controlwidget_text, widgetText);
 
         //Add a listener on the widget view to send the intent when pressed.
-        views.setOnClickPendingIntent(R.id.controlwidget_text, pending);
+        views.setOnClickPendingIntent(R.id.controlwidget_box, pending);
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
