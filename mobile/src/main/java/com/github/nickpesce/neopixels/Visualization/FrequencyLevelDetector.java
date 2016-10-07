@@ -1,7 +1,6 @@
 package com.github.nickpesce.neopixels.Visualization;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -9,27 +8,40 @@ import java.util.Queue;
  * Created by nick on 8/28/16.
  */
 public class FrequencyLevelDetector {
-    public static final int BAND_SUB = 0,
-            BAND_LOW = 1,
-            BAND_MID = 2,
-            BAND_HIGH = 3;
+    public static final int BAND_SUB = 0,//SUB BASS AND BASS (bottom .1%) | Bass beat
+            BAND_LOW = 1,//BASS, UPPER BASS AND LOW-MID (next 3.8%) | Lower vocal and lower drums
+            BAND_MID = 2,//UPPER-MID AND MID(next 21%) | Higher vocals and instruments
+            BAND_HIGH = 3;//HIGH FREQ AND ULTRA HIGH FREQ (remaining 75%) | Cymbals and high sounds
 
-    public static final int[] bandWidths = {1, 62, 96, 352};
+    public static final int[] bandWidths = {1, 20, 107, 384};
+    public static final int LONG_HISTORY_SIZE = 25;//50
+    public static final int SHORT_HISTORY_SIZE = 5;//15
+
     private ArrayList<FrequencyLevelListener> listeners;
 
-    private Queue<Double>[] energyHistories;
-    private double[] energySums;
+    private Queue<Double>[] longEnergyHistories;
+    private double[] longEnergySums;
+
+    private Queue<Double>[] shortEnergyHistories;
+    private double[] shortEnergySums;
 
     private Queue<Double>[] varianceHistories;
     private double[] varianceSums;
 
 
     public FrequencyLevelDetector() {
-        energyHistories = new LinkedList[4];
-        for(int i = 0; i < energyHistories.length; i++) {
-            energyHistories[i] = new LinkedList<>();
+        System.out.println();
+        longEnergyHistories = new LinkedList[4];
+        for(int i = 0; i < longEnergyHistories.length; i++) {
+            longEnergyHistories[i] = new LinkedList<>();
         }
-        energySums = new double[4];
+        longEnergySums = new double[4];
+
+        shortEnergyHistories = new LinkedList[4];
+        for(int i = 0; i < shortEnergyHistories.length; i++) {
+            shortEnergyHistories[i] = new LinkedList<>();
+        }
+        shortEnergySums = new double[4];
 
         varianceHistories = new LinkedList[4];
         for(int i = 0; i < varianceHistories.length; i++) {
@@ -41,8 +53,10 @@ public class FrequencyLevelDetector {
     }
 
     public void updateFFT(byte[] fft) {
-        double[] avgs = new double[bandWidths.length];
-        double[] prevs = new double[bandWidths.length];
+        double[] currents = new double[bandWidths.length];
+        double[] longs = new double[bandWidths.length];
+        double[] shorts = new double[bandWidths.length];
+
         double[] Cs = new double[bandWidths.length];
 
 
@@ -68,27 +82,37 @@ public class FrequencyLevelDetector {
             avg = tmp / energy.length;
 
 
-            //add the energy levels to energyHistory
-            energyHistories[band].add(avg);
-            energySums[band] += avg;
-            if (energyHistories[band].size() > Visualization.SAMPLES_PER_SEC)
-                energySums[band] -= energyHistories[band].poll();
+            //add the energy levels to long term energyHistory
+            longEnergyHistories[band].add(avg);
+            longEnergySums[band] += avg;
+            if (longEnergyHistories[band].size() > LONG_HISTORY_SIZE)
+                longEnergySums[band] -= longEnergyHistories[band].poll();
 
-            //Find the variance of the last second
-            double variance = Math.pow((avg - (energySums[band] / Visualization.SAMPLES_PER_SEC)), 2);
+            //add the energy levels to short term energyHistory
+            shortEnergyHistories[band].add(avg);
+            shortEnergySums[band] += avg;
+            if (shortEnergyHistories[band].size() > SHORT_HISTORY_SIZE)
+                shortEnergySums[band] -= shortEnergyHistories[band].poll();
+
+
+            //Find the variance of the long term
+            double variance = Math.pow((avg - (longEnergySums[band] / LONG_HISTORY_SIZE)), 2);
             varianceHistories[band].add(variance);
             varianceSums[band] += variance;
-            if (varianceHistories[band].size() > Visualization.SAMPLES_PER_SEC)
+            if (varianceHistories[band].size() > LONG_HISTORY_SIZE)
                 varianceSums[band] -= varianceHistories[band].poll();
 
             //Find a the constant value that determines a spike
-            double C = -.0025714 * varianceSums[band] / Visualization.SAMPLES_PER_SEC + 1.5142857;
-            avgs[band] = avg;
-            prevs[band] = energySums[band] / Visualization.SAMPLES_PER_SEC;
+            double C = -.0025714 * (varianceSums[band] / LONG_HISTORY_SIZE) + 1.5142857;
+            currents[band] = avg;
+            longs[band] = longEnergySums[band] / LONG_HISTORY_SIZE;
+            shorts[band] = shortEnergySums[band] / SHORT_HISTORY_SIZE;
+
             Cs[band] = C;
         }
         for(FrequencyLevelListener l : listeners) {
-            l.onFrequencyLevelsUpdate(avgs, prevs, Cs);
+            if(l!=null)
+                l.onFrequencyLevelsUpdate(shorts, longs, Cs);
         }
     }
 

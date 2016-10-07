@@ -9,7 +9,6 @@ import java.util.Random;
 
 public class Visualization implements Visualizer.OnDataCaptureListener {
 
-    public static int SAMPLES_PER_SEC = 5;
 
     private Visualizer visualizer;
     private VisualizationActivity display;
@@ -28,7 +27,7 @@ public class Visualization implements Visualizer.OnDataCaptureListener {
     }
 
     public void start() {
-        effect = new TestEffect();
+        effect = new BandsEffect();
         if(visualizer == null)
             visualizer = new Visualizer(0);
         visualizer.setDataCaptureListener(this, Visualizer.getMaxCaptureRate(), true, true);
@@ -93,7 +92,7 @@ public class Visualization implements Visualizer.OnDataCaptureListener {
         return running;
     }
 
-    private void printByteArray(byte[] a) {
+    private void printBySteArray(byte[] a) {
         for(byte b : a)
             System.out.print(b + ",");
         System.out.println();

@@ -15,17 +15,18 @@ public class VisualizationActivity extends AppCompatActivity {
 
     public static final int MY_REQUEST_RECORD_AUDIO = 34;
 
-    private LightView lightView;
+    public static LightView lightView;
     private Visualization visualization;
 
     public void update(byte[] pixels) {
         lightView.updatePixels(pixels);
-
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_visualization);
+        lightView = (LightView)findViewById(R.id.lightView);
         visualization = new Visualization(this);
 
         int permissionCheck = ContextCompat.checkSelfPermission(this,
@@ -43,8 +44,7 @@ public class VisualizationActivity extends AppCompatActivity {
             }).start();
         }
 
-        setContentView(R.layout.activity_visualization);
-        lightView = (LightView)findViewById(R.id.lightView);
+
 
     }
 
@@ -63,8 +63,8 @@ public class VisualizationActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        //visualization.destroy();
+    protected void onDestroy() {
+        super.onDestroy();
+        visualization.destroy();
     }
 }
