@@ -5,6 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="textAutoCorrect"
+        android:hint="What do you want me to do for you?"
+        android:gravity="center"
+        android:ems="10"
+        android:id="@+id/etAi" />
+
     <fragment android:name="com.github.nickpesce.neopixels.CommandEditor"
         android:id="@+id/fCommandEditor"
         android:layout_gravity="center_horizontal"
@@ -19,4 +28,5 @@
         android:id="@+id/bEditOk"
         android:visibility="gone"
         android:layout_gravity="center_horizontal" />
+
 </LinearLayout>

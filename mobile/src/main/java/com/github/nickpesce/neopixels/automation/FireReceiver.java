@@ -14,6 +14,7 @@ public final class FireReceiver extends BroadcastReceiver{
 
     public static final String BUNDLE = "com.twofortyfouram.locale.intent.extra.BUNDLE";
     public static final String BUNDLE_COMMAND = "command";
+    public static final String BUNDLE_AI = "ai";
     public static final String BUNDLE_BLURB = "com.twofortyfouram.locale.intent.extra.BLURB";
 
     @Override
@@ -23,8 +24,13 @@ public final class FireReceiver extends BroadcastReceiver{
 
         final Bundle bundle = intent.getBundleExtra(BUNDLE);
         final String command = bundle.getString(BUNDLE_COMMAND);
+        final String ai = bundle.getString(BUNDLE_AI);
 
         CommandSender sender = new CommandSender(context);
-        sender.startEffect(command);
+        if(command != null)
+            sender.startEffect(command);
+        else if(ai != null)
+            sender.startAi(ai);
+
     }
 }

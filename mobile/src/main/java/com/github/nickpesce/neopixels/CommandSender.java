@@ -12,6 +12,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import org.json.JSONArray;
@@ -68,6 +69,49 @@ public class CommandSender{
 
                     }
                 }) {
+            //add the basic authentication headers
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String> headers = new HashMap();
+                String name = prefs.getString("username", "admin");
+                String pass = prefs.getString("password", "pass123");
+                String credentials = name + ":" + pass;
+                String auth = "Basic "
+                        + Base64.encodeToString(credentials.getBytes(),
+                        Base64.NO_WRAP);
+                headers.put("Authorization", auth);
+                return headers;
+            }
+        };
+        //Add the request to the queue
+        queue.add(request);
+    }
+
+    public void startAi(final String command) {
+        String port = prefs.getString("port", "42297");
+        String url = prefs.getString("hostname", "nickspi.student.umd.edu") + ":" + port + "/ai_request";
+        //Build the request(With callbacks)
+        StringRequest request = new StringRequest(
+                Request.Method.POST, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Toast.makeText(context, response, Toast.LENGTH_SHORT).show();
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        if(error.networkResponse!=null)
+                            Toast.makeText(context, new String(error.networkResponse.data), Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(context, "Response Error", Toast.LENGTH_SHORT).show();
+
+                    }
+                }) {
+            public byte[] getBody() {
+                return command.getBytes();
+            }
             //add the basic authentication headers
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {

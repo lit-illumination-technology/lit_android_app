@@ -19,12 +19,14 @@ import com.github.nickpesce.neopixels.R;
 public final class EditActivity extends AppCompatActivity implements View.OnClickListener, com.github.nickpesce.neopixels.CommandEditor.CommandEditorListener {
 
     Button bOk;
+    EditText etAi;
     CommandEditor commandEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.edit_automation);
+        etAi = (EditText) findViewById(R.id.etAi);
         bOk = (Button)findViewById(R.id.bEditOk);
         bOk.setOnClickListener(this);
         commandEditor = (CommandEditor) getSupportFragmentManager().findFragmentById(R.id.fCommandEditor);
@@ -34,11 +36,18 @@ public final class EditActivity extends AppCompatActivity implements View.OnClic
     public void finish() {
         final Intent resultIntent = new Intent();
         final Bundle resultBundle = new Bundle();
-        String command = commandEditor.getJSON();
-        resultBundle.putString(FireReceiver.BUNDLE_COMMAND, command);
-        resultIntent.putExtra(FireReceiver.BUNDLE_BLURB, command);
-        if ( TaskerPlugin.Setting.hostSupportsOnFireVariableReplacement( this ) )
-            TaskerPlugin.Setting.setVariableReplaceKeys( resultBundle, new String [] { FireReceiver.BUNDLE_COMMAND } );
+        if(etAi.getText().toString() != "") {
+            resultBundle.putString(FireReceiver.BUNDLE_AI, etAi.getText().toString());
+            resultIntent.putExtra(FireReceiver.BUNDLE_BLURB, etAi.getText().toString());
+            if ( TaskerPlugin.Setting.hostSupportsOnFireVariableReplacement( this ) )
+                TaskerPlugin.Setting.setVariableReplaceKeys( resultBundle, new String [] { FireReceiver.BUNDLE_AI } );
+        } else {
+            String command = commandEditor.getJSON();
+            resultBundle.putString(FireReceiver.BUNDLE_COMMAND, command);
+            resultIntent.putExtra(FireReceiver.BUNDLE_BLURB, command);
+            if ( TaskerPlugin.Setting.hostSupportsOnFireVariableReplacement( this ) )
+                TaskerPlugin.Setting.setVariableReplaceKeys( resultBundle, new String [] { FireReceiver.BUNDLE_COMMAND } );
+        }
         resultIntent.putExtra("com.twofortyfouram.locale.intent.extra.BUNDLE", resultBundle);
         setResult(RESULT_OK, resultIntent);
         super.finish();
