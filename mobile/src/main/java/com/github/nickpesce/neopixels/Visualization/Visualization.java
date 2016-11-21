@@ -1,6 +1,8 @@
 package com.github.nickpesce.neopixels.Visualization;
 
 import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.media.audiofx.Equalizer;
 import android.media.audiofx.Visualizer;
 
 import java.util.LinkedList;
@@ -28,6 +30,8 @@ public class Visualization implements Visualizer.OnDataCaptureListener {
 
     public void start() {
         effect = new BandsEffect();
+        Equalizer mEqualizer = new Equalizer(0, 0);
+        mEqualizer.setEnabled(true);
         if(visualizer == null)
             visualizer = new Visualizer(0);
         visualizer.setDataCaptureListener(this, Visualizer.getMaxCaptureRate(), true, true);
@@ -92,7 +96,7 @@ public class Visualization implements Visualizer.OnDataCaptureListener {
         return running;
     }
 
-    private void printBySteArray(byte[] a) {
+    private void printByteArray(byte[] a) {
         for(byte b : a)
             System.out.print(b + ",");
         System.out.println();

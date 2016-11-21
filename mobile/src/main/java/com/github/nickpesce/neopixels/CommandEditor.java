@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -22,6 +24,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class CommandEditor extends Fragment implements AdapterView.OnItemSelectedListener, SeekBar.OnSeekBarChangeListener, CompoundButton.OnCheckedChangeListener{
@@ -36,7 +39,9 @@ public class CommandEditor extends Fragment implements AdapterView.OnItemSelecte
     private Spinner spEffect;
     private SeekBar sbRed, sbGreen, sbBlue, sbSpeed;
     private Switch swColor, swSpeed;
+    private LinearLayout llRanges;
     private SurfaceView svColor;
+    private List<String> ranges;
     private HashMap<String, Byte> effects;
     private HashMap<String, Object> args;
 
@@ -75,8 +80,12 @@ public class CommandEditor extends Fragment implements AdapterView.OnItemSelecte
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_command_editor, container, false);
         args = new HashMap();
+        ranges = new ArrayList<>();
 
         tvConnecting = (TextView) v.findViewById(R.id.tvConnecting);
+
+        llRanges = (LinearLayout) v.findViewById(R.id.llRanges);
+        sender.getRanges(this);
 
         spEffect = (Spinner) v.findViewById(R.id.spCommand);
         spEffect.setOnItemSelectedListener(this);
@@ -111,6 +120,10 @@ public class CommandEditor extends Fragment implements AdapterView.OnItemSelecte
             effect = "";
             return;
         }
+        if(ranges.isEmpty()) {
+            effect = "off";
+            return;
+        }
         effect = spEffect.getSelectedItem().toString();
         args.clear();
         if(swColor.isChecked())
@@ -118,6 +131,7 @@ public class CommandEditor extends Fragment implements AdapterView.OnItemSelecte
         if(swSpeed.isChecked()) {
             args.put("speed", sbSpeed.getProgress());
         }
+        args.put("ranges", ranges);
     }
 
     private void updateColor()
@@ -167,14 +181,33 @@ public class CommandEditor extends Fragment implements AdapterView.OnItemSelecte
             sbGreen.setVisibility(visible);
             sbBlue.setVisibility(visible);
             svColor.setVisibility(visible);
-        }else
+        }else if(buttonView.equals(swSpeed)) {
             sbSpeed.setVisibility(isChecked ? SeekBar.VISIBLE : SeekBar.GONE);
+        } else {
+            if(isChecked)
+                ranges.add(buttonView.getText().toString());
+            else
+                ranges.remove(buttonView.getText().toString());
+        }
         updateCommand();
     }
 
+    public void callBackRanges(List<String> ranges) {
+        boolean defaultRange = true;
+        for(String s : ranges) {
+            Switch sw = new Switch(this.getContext());
+            sw.setText(s);
+            sw.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            sw.setOnCheckedChangeListener(this);
+            sw.setChecked(defaultRange);
+            defaultRange = false;
+            llRanges.addView(sw);
+        }
+        updateLayout();
+    }
     /**
      * Callback from CommandSender.getEffects(CommandEditor).
-     * updates the ui with the effects received and notifies the listener (onEditorReady())
+     * updates the ui with the effects received and notifies the listener if everything is loaded(onEditorReady())
      * @param effects (Name, Modifiers) of effects received
      */
     public void callBackEffects(HashMap<String, Byte> effects) {
@@ -183,9 +216,15 @@ public class CommandEditor extends Fragment implements AdapterView.OnItemSelecte
                 android.R.layout.simple_spinner_item, new ArrayList(effects.keySet()));
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spEffect.setAdapter(adapter);
+        updateLayout();
+    }
+
+    public void updateLayout() {
+        if(ranges == null || effects == null) return;
         spEffect.setVisibility(Spinner.VISIBLE);
         swColor.setVisibility(Switch.VISIBLE);
         swSpeed.setVisibility(Switch.VISIBLE);
+        llRanges.setVisibility(LinearLayout.VISIBLE);
         tvConnecting.setVisibility(TextView.INVISIBLE);
         listener.onEditorReady();
     }

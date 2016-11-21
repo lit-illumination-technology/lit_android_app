@@ -19,6 +19,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -39,7 +40,7 @@ public class CommandSender{
 
     public void sendCommand(JSONObject command) {
         String port = prefs.getString("port", "42297");
-        String url = prefs.getString("hostname", "nickspi.student.umd.edu") + ":" + port + "/command";
+        String url = prefs.getString("hostname", "host.example.net") + ":" + port + "/command";
         //Build the request(With callbacks)
         JsonObjectRequest request = new JsonObjectRequest(
                 Request.Method.POST, url, command,
@@ -89,7 +90,7 @@ public class CommandSender{
 
     public void startAi(final String command) {
         String port = prefs.getString("port", "42297");
-        String url = prefs.getString("hostname", "nickspi.student.umd.edu") + ":" + port + "/ai_request";
+        String url = prefs.getString("hostname", "host.example.net") + ":" + port + "/ai_request";
         //Build the request(With callbacks)
         StringRequest request = new StringRequest(
                 Request.Method.POST, url,
@@ -203,7 +204,53 @@ public class CommandSender{
         queue.add(request);
     }
 
+    public void getRanges(final CommandEditor requester) {
+        String port = prefs.getString("port", "12345");
+        String url = null;
+        url = prefs.getString("hostname", "host.example.net") + ":" + port + "/get_ranges.json";
+        prefs.getString("password", "pass123");
 
+
+        //Build the request(With callbacks)
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET, url, null,
+
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        JSONArray ranges;
+                        try {
+                            ranges = response.getJSONArray("ranges");
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            return;
+                        }
+                        ArrayList<String> ret = new ArrayList<>();
+                        for(int i = 0; i <ranges.length(); i++) {
+                            try {
+                                String range = (String) ranges.get(i);
+                                ret.add(range);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        requester.callBackRanges(ret);
+                    }
+                },
+
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        requester.callBackError("Could not connect: " + error.toString());
+                        Toast.makeText(context, "Could not connect: " + error.toString(), Toast.LENGTH_LONG).show();
+                        error.printStackTrace();
+                    }
+                }
+        );
+
+        //Add the request to the queue
+        queue.add(request);
+    }
 
 
 }
