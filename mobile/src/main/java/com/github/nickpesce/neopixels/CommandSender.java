@@ -220,7 +220,7 @@ public class CommandSender{
                     public void onResponse(JSONObject response) {
                         JSONArray ranges;
                         try {
-                            ranges = response.getJSONArray("ranges");
+                            ranges = response.getJSONArray("sections");
                         } catch (JSONException e) {
                             e.printStackTrace();
                             return;
